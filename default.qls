@@ -1,0 +1,9 @@
+# https://codeql.github.com/docs/codeql-cli/creating-codeql-query-suites/
+
+- import: codeql-suites/java-security-and-quality.qls
+  query: experimental/Security/CWE/CWE-117/LogInjection.ql
+  from: codeql/java-queries         # query pack is based on the original one
+- exclude:
+    query filename:
+    - XSS.ql                        # exclude the default XSS query...
+- query: custom-xss.ql              # ...and replace it with the customized one
