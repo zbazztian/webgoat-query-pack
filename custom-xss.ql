@@ -20,32 +20,19 @@ class XSSConfig extends TaintTracking::Configuration {
   XSSConfig() { this = "XSSConfig" }
 
   override predicate isSource(DataFlow::Node source) { source instanceof RemoteFlowSource }
-  
+
   predicate isWebgoatSink(DataFlow::Node sink) {
     sink.asExpr()
     .(Argument)
     .getCall()
     .getCallee()
     .hasQualifiedName("org.owasp.webgoat.assignments", "AttackResult$AttackResultBuilder",
-    ["output", "outputArgs", "feedback", "feedbackArgs"]) 
+    ["output", "outputArgs", "feedback", "feedbackArgs"])
   }
-  
-class ReverseTaintStep extends XssAdditionalTaintStep {
-  override predicate step(DataFlow::Node node1, DataFlow::Node node2) {
-    exists(Method m, MethodAccess ma |
-      m.hasQualifiedName("java.lang", "AbstractStringBuilder", "reverse") and
-      ma.getMethod().getAnOverride*() = m and
-      node1.asExpr() = ma.getQualifier() and
-      node2.asExpr() = ma
-    )
-  }
-}
 
   override predicate isSink(DataFlow::Node sink) {
-    (
-      sink instanceof XssSink or
-      isWebgoatSink(sink)
-    )
+    sink instanceof XssSink or
+    isWebgoatSink(sink)
   }
 
   override predicate isSanitizer(DataFlow::Node node) { node instanceof XssSanitizer }
@@ -54,6 +41,17 @@ class ReverseTaintStep extends XssAdditionalTaintStep {
 
   override predicate isAdditionalTaintStep(DataFlow::Node node1, DataFlow::Node node2) {
     any(XssAdditionalTaintStep s).step(node1, node2)
+  }
+}
+
+class ReverseTaintStep extends XssAdditionalTaintStep {
+  override predicate step(DataFlow::Node node1, DataFlow::Node node2) {
+    exists(Method m, MethodAccess ma |
+      m.hasQualifiedName("java.lang", "AbstractStringBuilder", "reverse") and
+      ma.getMethod().getAnOverride*() = m and
+      node1.asExpr() = ma.getQualifier() and
+      node2.asExpr() = ma
+    )
   }
 }
 
