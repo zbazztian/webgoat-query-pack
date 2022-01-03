@@ -8,7 +8,7 @@
  * @precision high
  * @id java/customized-xss
  * @tags security
- * external/cwe/cwe-079
+ *       external/cwe/cwe-079
  */
 
 import java
