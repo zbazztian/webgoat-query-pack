@@ -4,7 +4,7 @@
  *              allows for a cross-site scripting vulnerability.
  * @kind path-problem
  * @problem.severity error
- * @security-severity 6.1
+ * @security-severity 9.1
  * @precision high
  * @id java/customized-xss
  * @tags security
@@ -20,16 +20,31 @@ class XSSConfig extends TaintTracking::Configuration {
   XSSConfig() { this = "XSSConfig" }
 
   override predicate isSource(DataFlow::Node source) { source instanceof RemoteFlowSource }
+  
+  predicate isWebgoatSink(DataFlow::Node sink) {
+    sink.asExpr()
+    .(Argument)
+    .getCall()
+    .getCallee()
+    .hasQualifiedName("org.owasp.webgoat.assignments", "AttackResult$AttackResultBuilder",
+    ["output", "outputArgs", "feedback", "feedbackArgs"]) 
+  }
+  
+class ReverseTaintStep extends XssAdditionalTaintStep {
+  override predicate step(DataFlow::Node node1, DataFlow::Node node2) {
+    exists(Method m, MethodAccess ma |
+      m.hasQualifiedName("java.lang", "AbstractStringBuilder", "reverse") and
+      ma.getMethod().getAnOverride*() = m and
+      node1.asExpr() = ma.getQualifier() and
+      node2.asExpr() = ma
+    )
+  }
+}
 
   override predicate isSink(DataFlow::Node sink) {
     (
       sink instanceof XssSink or
-      sink.asExpr()
-          .(Argument)
-          .getCall()
-          .getCallee()
-          .hasQualifiedName("org.owasp.webgoat.assignments", "AttackResult$AttackResultBuilder",
-            ["output", "outputArgs", "feedback"])
+      isWebgoatSink(sink)
     )
   }
 
