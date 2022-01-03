@@ -30,11 +30,16 @@ class XSSConfig extends TaintTracking::Configuration {
     ["output", "outputArgs", "feedback", "feedbackArgs"]) 
   }
   
-  predicate isStrBuilderToWebgoatsink(DataFlow::Node node1, DataFlow::Node node2) {
-    isWebgoatSink(node2)  and
-    node1.asExpr().(Argument).getCall().getCallee().getName().matches("StringBuilder") and
-    node2.asExpr().getAChildExpr().getAChildExpr().getAChildExpr() = node1.asExpr() 
+class ReverseTaintStep extends XssAdditionalTaintStep {
+  override predicate step(DataFlow::Node node1, DataFlow::Node node2) {
+    exists(Method m, MethodAccess ma |
+      m.hasQualifiedName("java.lang", "AbstractStringBuilder", "reverse") and
+      ma.getMethod().getAnOverride*() = m and
+      node1.asExpr() = ma.getQualifier() and
+      node2.asExpr() = ma
+    )
   }
+}
 
   override predicate isSink(DataFlow::Node sink) {
     (
