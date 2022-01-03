@@ -2,6 +2,7 @@
 
 - import: codeql-suites/java-security-and-quality.qls
   query: experimental/Security/CWE/CWE-117/LogInjection.ql
+  query: Security/CWE/CWE-798/HardcodedPasswordField.ql
   from: codeql/java-queries         # query pack is based on the original one
 - exclude:
     query filename:
