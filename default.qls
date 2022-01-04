@@ -1,10 +1,10 @@
 # https://codeql.github.com/docs/codeql-cli/creating-codeql-query-suites/
 
 - import: codeql-suites/java-security-and-quality.qls
-  query: experimental/Security/CWE/CWE-117/LogInjection.ql
   from: codeql/java-queries         # query pack is based on the original one
-- import: codeql-suites/java-security-and-quality.qls
-  query: Security/CWE/CWE-798/HardcodedPasswordField.ql
+- query: experimental/Security/CWE/CWE-117/LogInjection.ql
+  from: codeql/java-queries         # query pack is based on the original one
+- query: Security/CWE/CWE-798/HardcodedPasswordField.ql
   from: codeql/java-queries         # query pack is based on the original one
 - exclude:
     query filename:
